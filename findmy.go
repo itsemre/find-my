@@ -28,6 +28,7 @@ const (
 	playSoundSubject  = "Amazon Echo Find My iPhone Alert"
 )
 
+// TODO: reuse session
 type Client struct {
 	AppleID       string
 	Password      string
@@ -67,6 +68,7 @@ func NewClient(appleID, password string, extendedLogin bool) (*Client, error) {
 		},
 		jar:       j,
 		findMyURL: nil,
+		alertURL:  nil,
 	}
 	return &c, nil
 }
@@ -92,7 +94,7 @@ func (c *Client) post(url string, decodeObject, body any) (any, error) {
 	}
 	defer resp.Body.Close()
 
-	// If theres nothing to decode return with the HTTP response
+	// If there is nothing to decode return the HTTP response
 	if decodeObject == nil {
 		return resp, nil
 	}
@@ -107,7 +109,9 @@ func (c *Client) post(url string, decodeObject, body any) (any, error) {
 
 // sendRequest sets the required request headers prior to sending it
 func (c *Client) sendRequest(r *http.Request) (*http.Response, error) {
-	// Format cookies
+	// Format cookies and set them to the header
+	// The reason we have to do this is because we want the cookies to be present in all
+	// requests across different domains
 	cookies := ""
 	for _, cookie := range c.jar.AllCookies() {
 		cookies += fmt.Sprintf("%s=\"%s\";", cookie.Name, cookie.Value)
@@ -148,8 +152,8 @@ func (c *Client) GetUserInfo() (*userInfo, error) {
 	return c.UserInfo, nil
 }
 
-// GetFindMyInfo all information for the user's Find My service. It can optionally return the user's
-// family members' information as well, with: getFamily = true
+// GetFindMyInfo returns all available information for the user's Find My service. It can optionally return the user's
+// family members' information as well with: getFamily = true
 func (c *Client) GetFindMyInfo(getFamily bool) (*findMyInfo, error) {
 	// If the user information does not exist, retrieve it
 	if c.UserInfo == nil {
@@ -197,12 +201,12 @@ func (c *Client) GetFindMyInfo(getFamily bool) (*findMyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Cast the response to *userInfo
+	// Cast the response to *findMyInfo
 	c.FindMyInfo = resp.(*findMyInfo)
 	return c.FindMyInfo, nil
 }
 
-// GetDeviceInfo returns the information of the given device ID
+// GetDeviceInfo returns the information of the device with the provided ID
 func (c *Client) GetDeviceInfo(id string) (*deviceInfo, error) {
 	// If the device information does not exist, retrieve it
 	if c.FindMyInfo == nil {
@@ -220,7 +224,7 @@ func (c *Client) GetDeviceInfo(id string) (*deviceInfo, error) {
 	return nil, fmt.Errorf("error: could not find device ID '%s'", id)
 }
 
-// GetDeviceLocation returns the location information of the given device ID
+// GetDeviceLocation returns the location information of the device with the provided ID
 func (c *Client) GetDeviceLocation(id string) (*deviceLocation, error) {
 	dInfo, err := c.GetDeviceInfo(id)
 	if err != nil {
@@ -229,7 +233,7 @@ func (c *Client) GetDeviceLocation(id string) (*deviceLocation, error) {
 	return &dInfo.Location, nil
 }
 
-// AlertDevice plays a sound on the device with the given ID
+// AlertDevice plays a sound on the device with the provided ID
 func (c *Client) AlertDevice(id string) error {
 	// If the user information does not exist, retrieve it
 	if c.UserInfo == nil {

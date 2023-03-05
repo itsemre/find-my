@@ -27,29 +27,29 @@ func (c *fmy.Client) GetUserInfo() (*fmy.userInfo, error)
 ##### GetFindMyInfo
 
 ```go
-// GetFindMyInfo all information for the user's Find My service. It can optionally return the user's
-// family members' information as well, with: getFamily = true
+// GetFindMyInfo returns all available information for the user's Find My service. It can optionally return the user's
+// family members' information as well with: getFamily = true
 func (c *fmy.Client) GetFindMyInfo(getFamily bool) (*fmy.findMyInfo, error)
 ```
 
 ##### GetDeviceInfo
 
 ```go
-// GetDeviceInfo returns the information of the given device ID
+// GetDeviceInfo returns the information of the device with the provided ID
 func (c *fmy.Client) GetDeviceInfo(id string) (*fmy.deviceInfo, error)
 ```
 
 ##### GetDeviceLocation
 
 ```go
-// GetDeviceLocation returns the location information of the given device ID
+// GetDeviceLocation returns the location information of the device with the provided ID
 func (c *fmy.Client) GetDeviceLocation(id string) (*fmy.deviceLocation, error)
 ```
 
 ##### AlertDevice
 
 ```go
-// AlertDevice plays a sound on the device with the given ID
+// AlertDevice plays a sound on the device with the provided ID
 func (c *fmy.Client) AlertDevice(id string) error 
 ```
 
@@ -68,12 +68,12 @@ func main() {
         panic(err)
     }
 
-    dInfo, err := c.GetFindMyInfo(false) 
+    info, err := c.GetFindMyInfo(false) 
     if err != nil {
         panic(err)
     }
 
-    for _, d := range dInfo.Content {
+    for _, d := range info.Content {
         err = c.AlertDevice(d.ID)
         if err != nil {
             panic(err)
