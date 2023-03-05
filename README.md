@@ -65,7 +65,7 @@ import (
 func main() {
     c, err := fmy.NewClient("<apple_id>", "<password>", true)
 	if err != nil {
-		panic(err)
+	    panic(err)
 	}
 
     dInfo, err := c.GetFindMyInfo(false) 
@@ -76,7 +76,7 @@ func main() {
     for _, d := range dInfo.Content {
         err = c.AlertDevice(d.ID)
         if err != nil {
-        panic(err)
+            panic(err)
         }
     }
 }
