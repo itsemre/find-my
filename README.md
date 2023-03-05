@@ -64,9 +64,9 @@ import (
 
 func main() {
     c, err := fmy.NewClient("<apple_id>", "<password>", true)
-	if err != nil {
-	    panic(err)
-	}
+    if err != nil {
+        panic(err)
+    }
 
     dInfo, err := c.GetFindMyInfo(false) 
     if err != nil {
